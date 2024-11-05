@@ -15,6 +15,7 @@ export class FileUsageStorage implements IUsageStorage {
     private scopeType: string = '';
     private token: string = '';
     private team?: string;
+    private directChildTeams: string[] = [];
 
     private dirName: string = '../../data';
 
@@ -39,6 +40,7 @@ export class FileUsageStorage implements IUsageStorage {
         this.scopeType = tenant.scopeType;
         this.token = tenant.token;
         this.team=tenant.team;
+        this.directChildTeams = tenant.directChildTeams || [];
     }
 
     private initializeFilePath(tenant: Tenant) {
@@ -152,6 +154,13 @@ export class FileUsageStorage implements IUsageStorage {
             fs.writeFileSync(fileFullName, dataToWrite);
             console.log('Metrics saved successfully to file:', fileFullName);
             await this.compareAndUpdateMetrics(metrics);
+
+            // Save usage data for direct-child-teams
+            for (const team of this.directChildTeams) {
+                const teamMetrics = await getMetricsApi(this.scopeType, this.scopeName, this.token, team);
+                await this.saveUsageData(teamMetrics);
+            }
+
             return true;
         } catch (error) {
             console.error('Error saving metrics:', error);
