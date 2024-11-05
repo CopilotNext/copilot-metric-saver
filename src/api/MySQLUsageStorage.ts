@@ -9,6 +9,7 @@ export class MySQLUsageStorage implements IUsageStorage {
     private scope_name: string = '';
     private type: string = '';
     private team?: string= '';
+    private directChildTeams: string[] = [];
     private initialized: boolean = false;
 
     constructor(tenant: Tenant) {
@@ -41,6 +42,7 @@ export class MySQLUsageStorage implements IUsageStorage {
             this.scope_name = tenant.scopeName;
             this.type = tenant.scopeType;
             this.team = tenant.team;
+            this.directChildTeams = tenant.directChildTeams || [];
             console.log('scope_name in Usage initializeScope:', this.scope_name);
             console.log('team in Usage initializeScope:', this.team);
         } catch (error) {
@@ -141,14 +143,6 @@ export class MySQLUsageStorage implements IUsageStorage {
             `;
 
             for (const metric of metrics) {
-                //print the metric data and its parameters
-               // console.log('metric:', metric);
-                // console.log('metric.day:', metric.day);
-                // console.log('team:', this.team);
-                // console.log('scope_name:', this.scope_name);
-                // console.log('type:', this.type);
-               // console.log ('metricsQuery:', metricsQuery);
-
                 await this.dbConnection!.execute(metricsQuery, [
                     metric.day, metric.total_suggestions_count, metric.total_acceptances_count, metric.total_lines_suggested, metric.total_lines_accepted, metric.total_active_users, metric.total_chat_acceptances, metric.total_chat_turns, metric.total_active_chat_users, this.type, this.scope_name,this.team
                 ]);
@@ -159,6 +153,13 @@ export class MySQLUsageStorage implements IUsageStorage {
                     ]);
                 }
             }
+
+            // Save usage data for direct-child-teams
+            for (const team of this.directChildTeams) {
+                const teamMetrics = await getMetricsApi(this.type, this.scope_name, this.token, team);
+                await this.saveUsageData(teamMetrics);
+            }
+
             return true;
         } catch (error) {
             console.error('Error saving usage data to MySQL:', error);
@@ -171,8 +172,6 @@ export class MySQLUsageStorage implements IUsageStorage {
         console.log('team in readUsageData:', this.team);
         try {
 
-            // need to check whether the team is null or '', it is null or '' then we need to pass team='' in the query.
-            //or, the query should be  incluedes 'and team = ?' in the where clause.
             if (this.team === null || this.team === '') {
                 this.team = '';
             }
@@ -227,9 +226,6 @@ export class MySQLUsageStorage implements IUsageStorage {
                 query += ' AND day <= ?';
                 params.push(until);
             }
-
-            // query += ' LIMIT ? OFFSET ?';
-            // params.push(per_page, (page - 1) * per_page);
 
             console.log('query:', query);
             console.log('params:', params);
