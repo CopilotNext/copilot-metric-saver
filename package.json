@@ -27,7 +27,7 @@
     "@types/escape-html": "^1.0.4",
     "@types/express": "^5.0.0",
     "@types/mysql": "^2.15.26",
-    "@types/node": "^22.8.1",
+    "@types/node": "^22.9.0",
     "@types/swagger-jsdoc": "^6.0.4",
     "@types/swagger-ui-express": "^4.1.6",
     "ts-node": "^10.9.2",
