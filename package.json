@@ -17,7 +17,7 @@
     "dotenv": "^16.4.5",
     "escape-html": "^1.0.3",
     "express": "^4.21.1",
-    "mysql2": "^3.11.0",
+    "mysql2": "^3.11.5",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1"
   },
