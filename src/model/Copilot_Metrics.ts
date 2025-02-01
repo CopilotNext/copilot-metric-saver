@@ -27,7 +27,7 @@ export class CopilotIdeCodeCompletionsEditorModel {
     this.name = data.name;
     this.is_custom_model = data.is_custom_model;
     this.custom_model_training_date = data.custom_model_training_date || null;
-    this.total_engaged_users = data.total_engaged_users;
+    this.total_engaged_users = data.total_engaged_users || 0;
     this.languages = data.languages
       ? data.languages.map(
           (lang: any) => new CopilotIdeCodeCompletionsEditorModelLanguage(lang)
